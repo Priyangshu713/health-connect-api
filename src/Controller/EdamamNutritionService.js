@@ -6,10 +6,11 @@ const apiKey = process.env.YOUR_API_KEY
 
 export const fetchNutritionFromGemini = async (req, res) => {
     try {
+        const { modelType } = req.body;
         const genAI = new GoogleGenerativeAI(apiKey);
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: modelType || "gemini-2.5-flash",
         });
 
         const prompt = `

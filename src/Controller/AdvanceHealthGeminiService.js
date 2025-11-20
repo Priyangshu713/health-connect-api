@@ -1,11 +1,70 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import dotenv from 'dotenv'
+import { z } from 'zod'
+import crypto from 'crypto'
+import cache from '../utils/cache.js'
+
 dotenv.config()
 const apiKey = process.env.YOUR_API_KEY
 
+// Zod Schema for Health Data
+const healthDataSchema = z.object({
+    age: z.number().or(z.string().transform(Number)),
+    gender: z.string(),
+    height: z.number().or(z.string().transform(Number)),
+    weight: z.number().or(z.string().transform(Number)),
+    bmi: z.number().or(z.string().transform(Number)),
+    bmiCategory: z.string(),
+    bloodGlucose: z.number().or(z.string().transform(Number)),
+    modelType: z.string().default('gemini-1.5-pro'),
+    sleepHours: z.number().or(z.string().transform(Number)),
+    sleepQuality: z.string(),
+    exerciseHours: z.number().or(z.string().transform(Number)),
+    stressLevel: z.number().or(z.string().transform(Number)),
+    waterIntake: z.number().or(z.string().transform(Number)),
+    caffeine: z.number().or(z.string().transform(Number)),
+    diet: z.string(),
+
+    regularMeals: z.boolean().or(z.string().transform(val => val === 'true')),
+    lateNightSnacking: z.boolean().or(z.string().transform(val => val === 'true')),
+    highSugar: z.boolean().or(z.string().transform(val => val === 'true')),
+    fastFood: z.boolean().or(z.string().transform(val => val === 'true')),
+
+    smoking: z.string(),
+    alcoholConsumption: z.string(),
+
+    medicalConditions: z.string().default("None reported"),
+    medications: z.string().default("None reported"),
+    familyHistory: z.string().default("None reported"),
+});
 
 export const analyzeAdvancedHealthData = async (req, res) => {
     try {
+        // Validate request body
+        const validationResult = healthDataSchema.safeParse(req.body);
+
+        if (!validationResult.success) {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                message: 'Invalid input data',
+                details: validationResult.error.format()
+            });
+        }
+
+        // Generate cache key based on the validated data
+        const cacheKey = crypto.createHash('md5').update(JSON.stringify(validationResult.data)).digest('hex');
+        const cachedResponse = cache.get(cacheKey);
+
+        if (cachedResponse) {
+            console.log('Serving from cache');
+            return res.status(200).json({
+                success: true,
+                data: cachedResponse,
+                message: 'Health analysis retrieved from cache'
+            });
+        }
+
         const {
             age,
             gender,
@@ -21,24 +80,17 @@ export const analyzeAdvancedHealthData = async (req, res) => {
             stressLevel,
             waterIntake,
             caffeine,
-            dite,
-
+            diet,
             regularMeals,
             lateNightSnacking,
             highSugar,
             fastFood,
             smoking,
             alcoholConsumption,
-            medicalConditions = "None reported",
-            medications = "None reported",
-            familyHistory = "None reported" } = req.body;
-        if (!age || !gender || !height || !weight || !bmi || !bmiCategory || !bloodGlucose || !modelType || !sleepHours || !sleepQuality || !exerciseHours || !stressLevel || !waterIntake || !caffeine || !dite || !regularMeals || !lateNightSnacking || !highSugar || !fastFood || !smoking || !alcoholConsumption || !medicalConditions || !medications || !familyHistory) {
-            return res.status(400).json({
-                success: false,
-                data: null,
-                message: 'Invalid input data'
-            });
-        }
+            medicalConditions,
+            medications,
+            familyHistory
+        } = validationResult.data;
 
         // Check if there's meaningful medical history information
         const hasMedicalHistory =
@@ -84,7 +136,7 @@ export const analyzeAdvancedHealthData = async (req, res) => {
                         - Stress Level: ${stressLevel}/10
                         - Water Intake: ${waterIntake} liters per day
                         - Caffeine Intake: ${caffeine} cups per day
-                        - Diet Type: ${dite}
+                        - Diet Type: ${diet}
                         - Food Habits: 
                             * Regular meals: ${regularMeals ? 'Yes' : 'No'}
                             * Late night snacking: ${lateNightSnacking ? 'Yes' : 'No'}
@@ -123,13 +175,16 @@ export const analyzeAdvancedHealthData = async (req, res) => {
         const response = await result.response;
         const text = response.text();
 
+        // Store in cache
+        cache.set(cacheKey, text);
+
         return res.status(200).json({
             success: true,
             data: text,
             message: 'Health analysis completed successfully'
         });
     } catch (error) {
-        console.error('Error in analyzeAdvancedHealthData');
+        console.error('Error in analyzeAdvancedHealthData', error);
         res.status(500).json({
             success: false,
             data: null,

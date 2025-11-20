@@ -114,7 +114,7 @@ export const fetchNutritionPlanFromGemini = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching nutrition plan:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 
 };
@@ -174,7 +174,7 @@ export const fetchRecipeFromGemini = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching recipe:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 

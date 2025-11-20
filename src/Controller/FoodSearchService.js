@@ -4,7 +4,7 @@ dotenv.config()
 const apiKey = process.env.YOUR_API_KEY
 
 
-export const chackIfFoodItem = async (req, res) => {
+export const checkIfFoodItem = async (req, res) => {
     try {
 
         const { query, modelType } = req.body;
@@ -52,7 +52,7 @@ export const chackIfFoodItem = async (req, res) => {
 
     } catch (error) {
         console.error('Error in chackIfFoodItem:', error)
-        res.status(500).json({ error: 'Internal Server Error' })
+        return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
 
@@ -100,6 +100,6 @@ export const getHealthCategorization = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in getHealthCategorization ');
-        res.status(500).json({ error: 'Internal Server Error' })
+        return res.status(500).json({ error: 'Internal Server Error' })
     }
 };
