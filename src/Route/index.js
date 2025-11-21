@@ -68,4 +68,8 @@ router.post('/analyze-wellness', analyzeWellnessEntry);
 // Route to handle health insights (Profile Summary)
 router.post("/health-insights", analyzeHealthInsights);
 
+import { saveHealthHistory, getHealthHistory } from "../Controller/HealthHistoryController.js";
+router.post("/save-history", saveHealthHistory);
+router.get("/get-history/:userId", getHealthHistory);
+
 export default router;
