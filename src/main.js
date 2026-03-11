@@ -20,7 +20,12 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/api', router)
