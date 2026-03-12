@@ -12,7 +12,7 @@ const journalEntrySchema = z.object({
     date: z.string().optional(),
 });
 
-const SYSTEM_INSTRUCTION = `You are "Health Connect Wellness Companion". Your role is to analyze mood and mental wellness journal entries.
+const SYSTEM_INSTRUCTION = `You are "MediBridge Wellness Companion". Your role is to analyze mood and mental wellness journal entries.
 
 Your analysis should:
 1. **Sentiment Analysis:** Identify the overall emotional tone (positive, negative, neutral, mixed).
