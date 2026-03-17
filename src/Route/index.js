@@ -72,9 +72,4 @@ import { saveHealthHistory, getHealthHistory } from "../Controller/HealthHistory
 router.post("/save-history", saveHealthHistory);
 router.get("/get-history/:userId", getHealthHistory);
 
-// User health profile sync (cross-device)
-import { saveUserHealthProfile, getUserHealthProfile } from "../Controller/UserHealthProfileController.js";
-router.post("/save-health-profile", saveUserHealthProfile);
-router.get("/get-health-profile/:userId", getUserHealthProfile);
-
 export default router;
