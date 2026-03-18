@@ -45,7 +45,7 @@ const corsOptions = {
 
 // CORS must be applied before any other middleware
 app.use(cors(corsOptions))
-app.options('*', cors(corsOptions))
+app.options(/.*/, cors(corsOptions))
 
 // Body parsers come AFTER CORS
 app.use(express.json())
