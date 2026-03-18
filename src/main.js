@@ -2,27 +2,16 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 
-dotenv.config(
-    {
-        debug: false,
-        path: './.env',
-
-    }
-)
 
 import router from './Route/index.js'
 import connectDB from './Database/Index.js'
 
 // Middleware to ensure DB connection (especially important for Vercel lambdas)
-app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (error) {
-        console.error('Database connection failed in middleware:', error);
-        res.status(500).send('Internal Server Error: Database Connection Failed');
-    }
-});
+
+const app = express()
+
+dotenv.config()
+
 const PORT = process.env.PORT || 4000
 
 // ── CORS — must be FIRST middleware (before express.json) ─────────────────────
@@ -51,7 +40,6 @@ const corsOptions = {
 
 // CORS must be applied before any other middleware
 app.use(cors(corsOptions))
-app.options(/.*/, cors(corsOptions))
 
 // Body parsers come AFTER CORS
 app.use(express.json())
@@ -70,5 +58,12 @@ if (process.env.NODE_ENV !== 'production') {
     })
 }
 
-// Export for Vercel serverless
-export default app
+
+await connectDB().then(() => {
+    console.log('Database connected successfully')
+}).catch((error) => {
+    console.error('Database connection failed:', error)
+})
+
+// // Export for Vercel serverless
+// export default app
