@@ -4,7 +4,19 @@ import NodeCache from 'node-cache';
 import crypto from 'crypto';
 
 const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
-const genAI = new GoogleGenAI({ apiKey: process.env.YOUR_API_KEY });
+
+// Initialize lazily to prevent serverless cold-start crashes
+let genAIInstance = null;
+const getGenAI = () => {
+    if (!genAIInstance) {
+        const apiKey = process.env.YOUR_API_KEY;
+        if (!apiKey) {
+            console.error('CRITICAL: YOUR_API_KEY is missing from environment variables');
+        }
+        genAIInstance = new GoogleGenAI({ apiKey: apiKey || 'missing-key' });
+    }
+    return genAIInstance;
+};
 
 // Zod Schema for validation
 const journalEntrySchema = z.object({
@@ -74,7 +86,7 @@ export const analyzeWellnessEntry = async (req, res) => {
             parts: [{ text: prompt }]
         }];
 
-        const result = await genAI.models.generateContent({
+        const result = await getGenAI().models.generateContent({
             model: 'gemini-3.1-flash-lite-preview',
             config,
             contents

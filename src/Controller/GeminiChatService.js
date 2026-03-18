@@ -6,8 +6,21 @@ import { z } from 'zod';
 import ChatSession from '../Database/Model/ChatSession.js';
 
 dotenv.config();
-const apiKey = process.env.YOUR_API_KEY;
-const ai = new GoogleGenAI({ apiKey });
+
+// Initialize lazily to prevent serverless cold-start crashes if env var is missing
+let aiInstance = null;
+const getAI = () => {
+    if (!aiInstance) {
+        const apiKey = process.env.YOUR_API_KEY;
+        if (!apiKey) {
+            console.error('CRITICAL: YOUR_API_KEY is missing from environment variables');
+            // We don't throw immediately so the server can at least start,
+            // but API calls will fail gracefully later
+        }
+        aiInstance = new GoogleGenAI({ apiKey: apiKey || 'missing-key' });
+    }
+    return aiInstance;
+};
 
 // Zod Schemas
 const createSessionSchema = z.object({
@@ -165,6 +178,7 @@ export const getGeminiChatSession = async (req, res) => {
         // res.setHeader('Transfer-Encoding', 'chunked'); // Node.js handles this automatically with res.write
 
         try {
+            const ai = getAI();
             const response = await ai.models.generateContentStream({
                 model,
                 config,
