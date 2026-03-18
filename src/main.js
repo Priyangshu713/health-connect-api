@@ -13,10 +13,16 @@ dotenv.config(
 import router from './Route/index.js'
 import connectDB from './Database/Index.js'
 
-// Connect to MongoDB
-connectDB();
-
-const app = express()
+// Middleware to ensure DB connection (especially important for Vercel lambdas)
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error('Database connection failed in middleware:', error);
+        res.status(500).send('Internal Server Error: Database Connection Failed');
+    }
+});
 const PORT = process.env.PORT || 4000
 
 // ── CORS — must be FIRST middleware (before express.json) ─────────────────────
