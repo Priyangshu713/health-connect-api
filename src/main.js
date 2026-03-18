@@ -20,6 +20,7 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 app.use(express.json())
+
 const allowedOrigins = [
     'https://medibridgeofficial.vercel.app',
     'https://health-connect-app-main.vercel.app',
@@ -27,21 +28,24 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:8080',
-];
+]
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        if (origin.endsWith('.vercel.app')) return callback(null, true);
-        return callback(new Error('CORS: origin not allowed'));
+        // Allow Postman / server-to-server (no origin header)
+        if (!origin) return callback(null, true)
+        if (allowedOrigins.includes(origin)) return callback(null, true)
+        // Allow any Vercel preview deployment
+        if (origin.endsWith('.vercel.app')) return callback(null, true)
+        return callback(new Error(`CORS: origin ${origin} not allowed`))
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-}))
+}
 
-app.options('*', cors());
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/api', router)
