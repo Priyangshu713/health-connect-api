@@ -19,8 +19,7 @@ connectDB();
 const app = express()
 const PORT = process.env.PORT || 4000
 
-app.use(express.json())
-
+// ── CORS — must be FIRST middleware (before express.json) ─────────────────────
 const allowedOrigins = [
     'https://medibridgeofficial.vercel.app',
     'https://health-connect-app-main.vercel.app',
@@ -44,8 +43,12 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 }
 
+// CORS must be applied before any other middleware
 app.use(cors(corsOptions))
 app.options('*', cors(corsOptions))
+
+// Body parsers come AFTER CORS
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/api', router)
@@ -58,4 +61,5 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
 
-
+// Export for Vercel serverless
+export default app
