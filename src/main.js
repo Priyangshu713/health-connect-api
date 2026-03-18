@@ -57,9 +57,12 @@ app.get('/', (req, res) => {
     res.send('Welcome to MediBridge API')
 })
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+// Only listen on a port if not in Vercel serverless environment
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`)
+    })
+}
 
 // Export for Vercel serverless
 export default app
