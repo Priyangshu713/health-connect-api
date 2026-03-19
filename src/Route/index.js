@@ -21,11 +21,15 @@ import {
 } from "../Controller/GeminiChatService.js";
 import { analyzeHealthInsights } from "../Controller/HealthInsightsGeminiService.js";
 import { analyzeWellnessEntry } from "../Controller/WellnessGeminiService.js";
-import authRouter from "./auth.js";
+import verifyToken from "../utils/apiKeyMiddleware.js";
+
+import { saveHealthHistory, getHealthHistory } from "../Controller/HealthHistoryController.js";
+import { saveUserHealthProfile, getUserHealthProfile } from "../Controller/UserHealthProfileController.js";
 
 const router = express.Router();
 
-router.use("/auth", authRouter);
+// All AI & health routes require authentication
+router.use(verifyToken);
 
 // Route to handle health report generation
 router.post("/health-report", healthReportGemeniService);
@@ -68,8 +72,11 @@ router.post('/analyze-wellness', analyzeWellnessEntry);
 // Route to handle health insights (Profile Summary)
 router.post("/health-insights", analyzeHealthInsights);
 
-import { saveHealthHistory, getHealthHistory } from "../Controller/HealthHistoryController.js";
 router.post("/save-history", saveHealthHistory);
 router.get("/get-history/:userId", getHealthHistory);
+
+// Health profile routes
+router.post("/save-health-profile", saveUserHealthProfile);
+router.get("/get-health-profile/:userId", getUserHealthProfile);
 
 export default router;
