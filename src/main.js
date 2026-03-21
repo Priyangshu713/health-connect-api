@@ -47,6 +47,10 @@ const generalLimiter = rateLimit({
     max: 100, // 100 requests per 15 min per IP
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+        const aiRoutes = ['/api/send-message', '/api/health-report', '/api/advanced-health-analysis', '/api/nutrition-analysis', '/api/analyze-wellness', '/api/health-insights'];
+        return aiRoutes.some(route => req.path.startsWith(route));
+    },
     message: { error: 'Too many requests, please try again later.' }
 })
 
@@ -76,19 +80,18 @@ app.get('/', (req, res) => {
     res.send('Welcome to MediBridge API')
 })
 
+await connectDB().then(() => {
+    console.log('Database connected successfully')
+}).catch((error) => {
+    console.error('Database connection failed:', error)
+})
+
 // Only listen on a port if not in Vercel serverless environment
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`)
     })
 }
-
-
-await connectDB().then(() => {
-    console.log('Database connected successfully')
-}).catch((error) => {
-    console.error('Database connection failed:', error)
-})
 
 // // Export for Vercel serverless
 export default app
