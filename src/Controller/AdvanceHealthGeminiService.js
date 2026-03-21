@@ -16,7 +16,7 @@ const healthDataSchema = z.object({
     bmi: z.number().or(z.string().transform(Number)),
     bmiCategory: z.string(),
     bloodGlucose: z.number().or(z.string().transform(Number)),
-    modelType: z.string().default('gemini-1.5-pro'),
+    modelType: z.string().default('gemini-3.1-flash-lite-preview'),
     sleepHours: z.number().or(z.string().transform(Number)),
     sleepQuality: z.string(),
     exerciseHours: z.number().or(z.string().transform(Number)),
