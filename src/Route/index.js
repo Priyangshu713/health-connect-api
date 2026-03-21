@@ -21,6 +21,7 @@ import {
 } from "../Controller/GeminiChatService.js";
 import { analyzeHealthInsights } from "../Controller/HealthInsightsGeminiService.js";
 import { analyzeWellnessEntry } from "../Controller/WellnessGeminiService.js";
+import { getAIUsageStatus, checkFreeUserLimit } from "../Controller/AIUsageController.js";
 import verifyToken from "../utils/apiKeyMiddleware.js";
 
 import { saveHealthHistory, getHealthHistory } from "../Controller/HealthHistoryController.js";
@@ -62,9 +63,12 @@ router.get("/get-Nutrition", fetchNutritionFromGemini);
 
 router.post("/workout-analysis", analyzeWorkout);
 
-router.post("/create-chat-session", createGeminiChatSession);
-router.post("/send-message", getGeminiChatSession);
+router.post("/create-chat-session", checkFreeUserLimit, createGeminiChatSession);
+router.post("/send-message", checkFreeUserLimit, getGeminiChatSession);
 router.get("/chat-history/:sessionId", getChatHistory);
+
+// AI usage status for free users (timer/counter)
+router.get("/ai-usage-status", getAIUsageStatus);
 
 // Wellness journal endpoint
 router.post('/analyze-wellness', analyzeWellnessEntry);

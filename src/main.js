@@ -6,11 +6,10 @@ import rateLimit from 'express-rate-limit'
 import router from './Route/index.js'
 import connectDB from './Database/Index.js'
 
-// Middleware to ensure DB connection (especially important for Vercel lambdas)
+// Load env vars BEFORE creating the Express app
+dotenv.config()
 
 const app = express()
-
-dotenv.config()
 
 const PORT = process.env.PORT || 4000
 
